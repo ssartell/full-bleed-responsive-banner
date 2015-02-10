@@ -1,0 +1,7 @@
+body { margin: 0; }
+
+h1 {
+	background: url(header.png);
+	height: 100px;
+	width: 100%;
+}
