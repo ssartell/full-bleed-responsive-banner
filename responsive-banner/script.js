@@ -88,7 +88,7 @@
 			return "\
 @media (max-width: " + self.widthToClip() + "px) {\n\
     " + self.selector() + " {\n\
-        background-position: center " + self.leftRightText() + " " + self.rightEdge() + "px;\n\
+        background-position: center " + self.leftRightText() + " -" + self.rightEdge() + "px;\n\
     }\n\
 }\n\
 \n\
