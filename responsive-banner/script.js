@@ -1,53 +1,55 @@
 (function() {
 
-	var model = {
-		imageSize: ko.observable(0),
-		focalSize: ko.observable(0),
-		leftEdge: ko.observable(0),
+	var CalculatorViewModel = function() {
+		var self = this;
 
-		halfway: ko.computed(function() {
-			return this.imageSize() / 2;
-		}),
+		self.imageSize = ko.observable(0);
+		self.focalSize = ko.observable(0);
+		self.leftEdge = ko.observable(0);
 
-		sizeDifference: ko.computed(function() {
-			return this.imageSize() - this.focalSize();
-		}),
+		self.halfway = ko.computed(function() {
+			return self.imageSize() / 2;
+		});
 
-		rightEdge: ko.computed(function() {
-			return this.imageSize() - (this.leftEdge() + this.focalSize());
-		}),
+		self.sizeDifference = ko.computed(function() {
+			return self.imageSize() - self.focalSize();
+		});
 
-		leftPercent: ko.computed(function() {
-			return this.leftEdge() / this.sizeDifference();
-		}),
+		self.rightEdge = ko.computed(function() {
+			return self.imageSize() - (self.leftEdge() + self.focalSize());
+		});
 
-		rightPercent: ko.computed(function() {
-			return this.rightEdge() / this.sizeDifference();
-		}),
+		self.leftPercent = ko.computed(function() {
+			return self.leftEdge() / self.sizeDifference();
+		});
 
-		backgroundSize: ko.computed(function() {
-			return this.imageSize() / this.focalSize();
-		}),
+		self.rightPercent = ko.computed(function() {
+			return self.rightEdge() / self.sizeDifference();
+		});
 
-		widthToClip: ko.computed(function() {
-			if (this.isShiftedLeft()) {
-				return this.halfway() - this.leftEdge() * 2;
+		self.backgroundSize = ko.computed(function() {
+			return self.imageSize() / self.focalSize();
+		});
+
+		self.widthToClip = ko.computed(function() {
+			if (self.isShiftedLeft()) {
+				return self.halfway() - self.leftEdge() * 2;
 			} else {
-				return this.halfway() - this.rightEdge() * 2;
+				return self.halfway() - self.rightEdge() * 2;
 			}
-		}),
+		});
 
-		isShiftedLeft: ko.computed(function() {
-			return math.absolute(this.halfway() - this.leftEdge()) > math.absolute(this.halfway() - this.rightEdge());
-		}),
+		self.isShiftedLeft = ko.computed(function() {
+			return math.absolute(self.halfway() - self.leftEdge()) > math.absolute(self.halfway() - self.rightEdge());
+		});
 
-		renderedCss: ko.computed(function() {
-			return this.isShiftedLeft();
-		})
+		self.renderedCss = ko.computed(function() {
+			return self.isShiftedLeft();
+		});
 	};
 
 	document.addEventListener("DOMContentLoaded", function(event) {
-		ko.applyBindings(model)
+		ko.applyBindings(new CalculatorViewModel());
 	});
 
 }());
