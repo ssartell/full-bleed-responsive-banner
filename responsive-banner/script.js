@@ -35,6 +35,7 @@
 	var CalculatorViewModel = function() {
 		var self = this;
 
+		self.selector = ko.observable("");
 		self.imageSize = ko.observable(0).extend({ numeric: 0 });
 		self.focalSize = ko.observable(0).extend({ numeric: 0 });
 		self.leftEdge = ko.observable(0).extend({ numeric: 0 });
@@ -86,13 +87,13 @@
 		self.renderedCss = ko.computed(function() {
 			return "\
 @media (max-width: " + self.widthToClip() + "px) {\n\
-    .banner {\n\
+    " + self.selector() + " {\n\
         background-position: center " + self.leftRightText() + " " + self.rightEdge() + "px;\n\
     }\n\
 }\n\
 \n\
 @media (max-width: " + self.focalSize() + "px) {\n\
-    .banner {\n\
+    " + self.selector() + " {\n\
         background-position: center " + self.leftRightText() + " " + self.percent() + "%;\n\
         background-size: " + self.backgroundSize() + "% auto;\n\
     }\n\
