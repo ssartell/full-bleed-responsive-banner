@@ -5,6 +5,7 @@ h1 {
 	height: 100px;
 	width: 100%;
 	text-indent: -9999px;
+	margin-top: 0;
 }
 
 @media (max-width: 852px) {
