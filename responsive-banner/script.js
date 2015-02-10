@@ -27,7 +27,7 @@
 	    //return the new computed observable
 	    return result;
 	};
-}())
+}());
 
 
 (function() {
