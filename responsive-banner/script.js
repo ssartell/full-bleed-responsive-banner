@@ -55,12 +55,20 @@
 			return Math.abs(self.halfway() - self.leftEdge()) > Math.abs(self.halfway() - self.rightEdge());
 		});
 
+		self.leftRightText = ko.computed(function() {
+			return self.isShiftedLeft() ? "left" : "right";
+		});
+
 		self.leftPercent = ko.computed(function() {
 			return self.leftEdge() / self.sizeDifference();
 		});
 
 		self.rightPercent = ko.computed(function() {
 			return self.rightEdge() / self.sizeDifference();
+		});
+
+		self.percent = ko.computed(function() {
+			return self.isShiftedLeft() ? self.leftPercent() : self.rightPercent();
 		});
 
 		self.backgroundSize = ko.computed(function() {
@@ -79,20 +87,20 @@
 			return "\
 @media (max-width: " + self.widthToClip() + "px) {\n\
     .banner {\n\
-        background-position: center right -576px;\n\
+        background-position: center " + self.leftRightText() + " " + self.rightEdge() + "px;\n\
     }\n\
 }\n\
 \n\
 @media (max-width: " + self.focalSize() + "px) {\n\
-    .hero {\n\
-        background-position: center right 36%;\n\
-        background-size: 600% auto;\n\
+    .banner {\n\
+        background-position: center " + self.leftRightText() + " " + self.percent() + "%;\n\
+        background-size: " + self.backgroundSize() + "% auto;\n\
     }\b\n\
 }";
 		});
 
 		self.renderedCss.subscribe(function() {
-			Prism.highlightAll();
+			setTimeout(Prism.highlightAll, 0);
 		});
 	};
 
