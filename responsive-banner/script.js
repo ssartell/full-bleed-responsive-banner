@@ -60,11 +60,11 @@
 		});
 
 		self.leftPercent = ko.computed(function() {
-			return self.leftEdge() / self.sizeDifference();
+			return self.leftEdge() / self.sizeDifference() * 100;
 		});
 
 		self.rightPercent = ko.computed(function() {
-			return self.rightEdge() / self.sizeDifference();
+			return self.rightEdge() / self.sizeDifference() * 100;
 		});
 
 		self.percent = ko.computed(function() {
@@ -72,7 +72,7 @@
 		});
 
 		self.backgroundSize = ko.computed(function() {
-			return self.imageSize() / self.focalSize();
+			return self.imageSize() / self.focalSize() * 100;
 		});
 
 		self.widthToClip = ko.computed(function() {
