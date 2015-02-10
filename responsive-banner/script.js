@@ -48,8 +48,5 @@
 		});
 	};
 
-	document.addEventListener("DOMContentLoaded", function(event) {
-		ko.applyBindings(new CalculatorViewModel());
-	});
-
+	ko.applyBindings(new CalculatorViewModel());
 }());
