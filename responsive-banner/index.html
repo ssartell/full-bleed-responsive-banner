@@ -34,7 +34,20 @@
 		</form>
 
 		<div>
-			<pre><code data-bind="text: renderedCss" class="language-css"></code></pre>
+			<pre><code class="language-css">
+@media (max-width: <span data-bind="text: widthToClip"></span>px) {
+    .banner {
+        background-position: center right -576px;
+    }
+}
+
+@media (max-width: 320px) {
+    .hero {
+        background-position: center right 36%;
+        background-size: 600% auto;
+    }
+}
+			</code></pre>
 		</div>
 	</div>
 
