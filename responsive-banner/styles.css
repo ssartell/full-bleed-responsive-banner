@@ -4,4 +4,18 @@ h1 {
 	background: url(header.png);
 	height: 100px;
 	width: 100%;
+	text-indent: -9999px;
+}
+
+@media (max-width: 528px) {
+    h1 {
+        background-position: center right -696px;
+    }
+}
+
+@media (max-width: 295px) {
+    h1 {
+        background-position: center right 42.830769230769235%;
+        background-size: 650.8474576271187% auto;
+    }
 }
