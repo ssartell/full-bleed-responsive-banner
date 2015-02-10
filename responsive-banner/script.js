@@ -77,18 +77,22 @@
 
 		self.renderedCss = ko.computed(function() {
 			return "\
-@media (max-width: " + self.widthToClip() + ") {\n\
+@media (max-width: " + self.widthToClip() + "px) {\n\
     .banner {\n\
         background-position: center right -576px;\n\
     }\n\
 }\n\
 \n\
-@media (max-width: 320px) {\n\
+@media (max-width: " + self.focalSize() + "px) {\n\
     .hero {\n\
         background-position: center right 36%;\n\
         background-size: 600% auto;\n\
     }\b\n\
 }";
+		});
+
+		self.renderedCss.subscribe(function() {
+			Prism.highlightAll();
 		});
 	};
 
