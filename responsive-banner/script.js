@@ -95,7 +95,7 @@
     .banner {\n\
         background-position: center " + self.leftRightText() + " " + self.percent() + "%;\n\
         background-size: " + self.backgroundSize() + "% auto;\n\
-    }\b\n\
+    }\n\
 }";
 		});
 
