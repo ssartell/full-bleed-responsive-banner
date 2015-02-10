@@ -7,15 +7,15 @@ h1 {
 	text-indent: -9999px;
 }
 
-@media (max-width: 782px) {
+@media (max-width: 852px) {
     h1 {
-        background-position: center left -695px;
+        background-position: center right -534px;
     }
 }
 
-@media (max-width: 656px) {
+@media (max-width: 658px) {
     h1 {
-        background-position: center left 45.015822784810126%;
-        background-size: 292.6829268292683% auto;
+        background-position: center right 42.313787638668785%;
+        background-size: 291.79331306990883% auto;
     }
 }
