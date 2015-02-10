@@ -76,7 +76,19 @@
 		});
 
 		self.renderedCss = ko.computed(function() {
-			return self.isShiftedLeft();
+			return "\
+@media (max-width: 768px) {\
+    .banner {\
+        background-position: center right -576px;\
+    }\
+}\
+\
+@media (max-width: 320px) {\
+    .hero {\
+        background-position: center right 36%;\
+        background-size: 600% auto;\
+    }\
+}";
 		});
 	};
 
