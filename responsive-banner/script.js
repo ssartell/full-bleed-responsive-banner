@@ -86,6 +86,11 @@
 
 		self.renderedCss = ko.computed(function() {
 			return "\
+" + self.selector() + " {\n\
+	background-position: center;\n\
+	background-repeat: no-repeat;\n\
+}\n\
+\n\
 @media (max-width: " + self.widthToClip() + "px) {\n\
     " + self.selector() + " {\n\
         background-position: center " + self.leftRightText() + " -" + self.rightEdge() + "px;\n\
