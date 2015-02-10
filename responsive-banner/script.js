@@ -19,6 +19,10 @@
 			return self.imageSize() - (self.leftEdge() + self.focalSize());
 		});
 
+		self.isShiftedLeft = ko.computed(function() {
+			return math.absolute(self.halfway() - self.leftEdge()) > math.absolute(self.halfway() - self.rightEdge());
+		});
+
 		self.leftPercent = ko.computed(function() {
 			return self.leftEdge() / self.sizeDifference();
 		});
@@ -37,10 +41,6 @@
 			} else {
 				return self.halfway() - self.rightEdge() * 2;
 			}
-		});
-
-		self.isShiftedLeft = ko.computed(function() {
-			return math.absolute(self.halfway() - self.leftEdge()) > math.absolute(self.halfway() - self.rightEdge());
 		});
 
 		self.renderedCss = ko.computed(function() {
