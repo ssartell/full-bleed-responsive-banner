@@ -77,17 +77,17 @@
 
 		self.renderedCss = ko.computed(function() {
 			return "\
-@media (max-width: 768px) {
-    .banner {
-        background-position: center right -576px;
-    }
-}
-
-@media (max-width: 320px) {
-    .hero {
-        background-position: center right 36%;
-        background-size: 600% auto;
-    }
+@media (max-width: " + self.widthToClip() + ") {\n\
+    .banner {\n\
+        background-position: center right -576px;\n\
+    }\n\
+}\n\
+\n\
+@media (max-width: 320px) {\n\
+    .hero {\n\
+        background-position: center right 36%;\n\
+        background-size: 600% auto;\n\
+    }\b\n\
 }";
 		});
 	};
