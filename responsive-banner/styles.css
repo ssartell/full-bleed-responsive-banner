@@ -1,7 +1,7 @@
 body { margin: 0; }
 
 h1 {
-	background: url(header.png);
+	background: url(header.png) center;
 	height: 100px;
 	width: 100%;
 	text-indent: -9999px;
