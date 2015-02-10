@@ -20,7 +20,7 @@
 		});
 
 		self.isShiftedLeft = ko.computed(function() {
-			return Math.absolute(self.halfway() - self.leftEdge()) > Math.absolute(self.halfway() - self.rightEdge());
+			return Math.abs(self.halfway() - self.leftEdge()) > Math.abs(self.halfway() - self.rightEdge());
 		});
 
 		self.leftPercent = ko.computed(function() {
