@@ -77,9 +77,9 @@
 
 		self.widthToClip = ko.computed(function() {
 			if (self.isShiftedLeft()) {
-				return self.halfway() - self.leftEdge() * 2;
+				return (self.halfway() - self.leftEdge()) * 2;
 			} else {
-				return self.halfway() - self.rightEdge() * 2;
+				return (self.halfway() - self.rightEdge()) * 2;
 			}
 		});
 
