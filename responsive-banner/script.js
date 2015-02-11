@@ -35,10 +35,11 @@
 	var CalculatorViewModel = function() {
 		var self = this;
 
-		self.selector = ko.observable("");
-		self.imageSize = ko.observable(0).extend({ numeric: 0 });
-		self.focalSize = ko.observable(0).extend({ numeric: 0 });
-		self.leftEdge = ko.observable(0).extend({ numeric: 0 });
+		self.selector = ko.observable(".banner");
+		self.imageSize = ko.observable(1920).extend({ numeric: 0 });
+		self.focalSize = ko.observable(390).extend({ numeric: 0 });
+		self.leftEdge = ko.observable(480).extend({ numeric: 0 });
+		self.imageUrl = ko.observable("http://placehold.it/1920x1080/&text=demo+banner");
 
 		self.halfway = ko.computed(function() {
 			return self.imageSize() / 2;
@@ -72,6 +73,10 @@
 			return self.isShiftedLeft() ? self.leftPercent() : self.rightPercent();
 		});
 
+		self.edge = ko.computed(function() {
+			return self.isShiftedLeft() ? self.leftEdge() : self.rightEdge();
+		});
+
 		self.backgroundSize = ko.computed(function() {
 			return self.imageSize() / self.focalSize() * 100;
 		});
@@ -84,29 +89,73 @@
 			}
 		});
 
+		self.setBannerImage = function(data, event) {
+			var file = event.target.files[0];
+			var reader = new FileReader();
+			var image = new Image();
+
+			reader.onload = function(event) {
+				var src = event.target.result;
+				self.imageUrl(src);
+				image.src = src;
+			};
+
+			image.onload = function() {
+				self.imageSize(this.width);
+			};
+
+			reader.readAsDataURL(file);
+		};
+
 		self.renderedCss = ko.computed(function() {
-			return "\
-" + self.selector() + " {\n\
-	background-position: center;\n\
-	background-repeat: no-repeat;\n\
-}\n\
-\n\
-@media (max-width: " + self.widthToClip() + "px) {\n\
-    " + self.selector() + " {\n\
-        background-position: center " + self.leftRightText() + " -" + self.rightEdge() + "px;\n\
-    }\n\
-}\n\
-\n\
-@media (max-width: " + self.focalSize() + "px) {\n\
-    " + self.selector() + " {\n\
-        background-position: center " + self.leftRightText() + " " + self.percent() + "%;\n\
-        background-size: " + self.backgroundSize() + "% auto;\n\
-    }\n\
-}";
+			return self.selector() + " {\n" +
+			"	background-position: center;\n" +
+			"	background-repeat: no-repeat;\n" +
+			"}\n" +
+			"\n" +
+			"@media (max-width: " + self.widthToClip() + "px) {\n" +
+			"    " + self.selector() + " {\n" +
+			"        background-position: center " + self.leftRightText() + " -" + self.edge() + "px;\n" +
+			"    }\n" +
+			"}\n" +
+			"\n" +
+			"@media (max-width: " + self.focalSize() + "px) {\n" +
+			"    " + self.selector() + " {\n" +
+			"        background-position: center " + self.leftRightText() + " " + self.percent() + "%;\n" +
+			"        background-size: " + self.backgroundSize() + "% auto;\n" +
+			"    }\n" +
+			"}";
 		});
 
 		self.renderedCss.subscribe(function() {
 			setTimeout(Prism.highlightAll, 0);
+		});
+
+		self.demoCss = ko.computed(function() {
+			if (self.imageUrl() !== "") {
+				return ".demo {\n" +
+				"   height: 200px;\n" +
+				"   margin-bottom: 16px;\n" +
+				"   background-image: url(" + self.imageUrl() + ");\n" +
+				"	background-position: center;\n" +
+				"	background-repeat: no-repeat;\n" +
+				"}\n" +
+				"\n" +
+				"@media (max-width: " + self.widthToClip() + "px) {\n" +
+				"    .demo {\n" +
+				"        background-position: center " + self.leftRightText() + " -" + self.edge() + "px;\n" +
+				"    }\n" +
+				"}\n" +
+				"\n" +
+				"@media (max-width: " + self.focalSize() + "px) {\n" +
+				"    .demo {\n" +
+				"        background-position: center " + self.leftRightText() + " " + self.percent() + "%;\n" +
+				"        background-size: " + self.backgroundSize() + "% auto;\n" +
+				"    }\n" +
+				"}";
+			} else {
+				return "";
+			}			
 		});
 	};
 

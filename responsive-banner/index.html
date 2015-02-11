@@ -15,30 +15,41 @@
 <body>
 	<h1>full bleed, responsive banner with focal point</h1>
 
-	<div class="container">
-		<form class="row">
-			<div class="col-sm-3">
-				<label for="selector">Selector</label>
-    			<input data-bind="textInput: selector" type="text" class="form-control" id="selector" placeholder="Enter css selector">
-			</div>
+	<div class="demo"></div>
+	<style type="text/css" data-bind="text: demoCss"></style>
 
-			<div class="col-sm-3">
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-4">
 				<label for="image-size">Image width</label>
     			<input data-bind="textInput: imageSize" type="text" class="form-control" id="image-size" placeholder="Enter value in pixels">
 			</div>
 
-			<div class="col-sm-3">
+			<div class="col-sm-4">
 				<label for="focal-size">Focal width</label>
     			<input data-bind="textInput: focalSize" type="text" class="form-control" id="focal-size" placeholder="Enter value in pixels">
 			</div>
 
-			<div class="col-sm-3">
+			<div class="col-sm-4">
 				<label for="left-edge">Left edge of focal</label>
     			<input data-bind="textInput: leftEdge" type="text" class="form-control" id="left-edge" placeholder="Enter value in pixels">
 			</div>
-		</form>
+		</div>
+
+		<div class="row">
+			<div class="col-sm-6">
+				<label for="selector">Selector</label>
+    			<input data-bind="textInput: selector" type="text" class="form-control" id="selector" placeholder="Enter css selector">
+			</div>
+
+			<div class="col-sm-6">
+				<label for="banner-image">Pick banner image</label>
+				<input id="banner-image" data-bind="event: { change: setBannerImage }" type="file">
+			</div>
+		</div>		
 
 		<div>
+			<label>Css output</label>
 			<pre><code data-bind="text: renderedCss" class="language-css"></code></pre>
 		</div>
 	</div>
