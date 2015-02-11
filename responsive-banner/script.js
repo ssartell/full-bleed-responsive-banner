@@ -40,6 +40,7 @@
 		self.focalSize = ko.observable(390).extend({ numeric: 0 });
 		self.leftEdge = ko.observable(480).extend({ numeric: 0 });
 		self.imageUrl = ko.observable("http://placehold.it/1920x1080/&text=demo+banner");
+		self.imageHeight = ko.observable(200).extend({ numeric: 0 });
 
 		self.halfway = ko.computed(function() {
 			return self.imageSize() / 2;
@@ -109,6 +110,7 @@
 
 		self.renderedCss = ko.computed(function() {
 			return self.selector() + " {\n" +
+			"	height: " + self.imageHeight() + "px;\n" +
 			"	background-position: center;\n" +
 			"	background-repeat: no-repeat;\n" +
 			"}\n" +
@@ -132,30 +134,26 @@
 		});
 
 		self.demoCss = ko.computed(function() {
-			if (self.imageUrl() !== "") {
-				return ".demo {\n" +
-				"   height: 200px;\n" +
-				"   margin-bottom: 16px;\n" +
-				"   background-image: url(" + self.imageUrl() + ");\n" +
-				"	background-position: center;\n" +
-				"	background-repeat: no-repeat;\n" +
-				"}\n" +
-				"\n" +
-				"@media (max-width: " + self.widthToClip() + "px) {\n" +
-				"    .demo {\n" +
-				"        background-position: center " + self.leftRightText() + " -" + self.edge() + "px;\n" +
-				"    }\n" +
-				"}\n" +
-				"\n" +
-				"@media (max-width: " + self.focalSize() + "px) {\n" +
-				"    .demo {\n" +
-				"        background-position: center " + self.leftRightText() + " " + self.percent() + "%;\n" +
-				"        background-size: " + self.backgroundSize() + "% auto;\n" +
-				"    }\n" +
-				"}";
-			} else {
-				return "";
-			}			
+			return ".demo {\n" +
+			"   height: " + self.imageHeight() + "px;\n" +
+			"   margin-bottom: 16px;\n" +
+			"   background-image: url(" + self.imageUrl() + ");\n" +
+			"	background-position: center;\n" +
+			"	background-repeat: no-repeat;\n" +
+			"}\n" +
+			"\n" +
+			"@media (max-width: " + self.widthToClip() + "px) {\n" +
+			"    .demo {\n" +
+			"        background-position: center " + self.leftRightText() + " -" + self.edge() + "px;\n" +
+			"    }\n" +
+			"}\n" +
+			"\n" +
+			"@media (max-width: " + self.focalSize() + "px) {\n" +
+			"    .demo {\n" +
+			"        background-position: center " + self.leftRightText() + " " + self.percent() + "%;\n" +
+			"        background-size: " + self.backgroundSize() + "% auto;\n" +
+			"    }\n" +
+			"}";			
 		});
 	};
 

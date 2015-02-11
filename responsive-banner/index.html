@@ -26,6 +26,18 @@
 			</div>
 
 			<div class="col-sm-4">
+				<label for="image-height">Image height</label>
+    			<input data-bind="textInput: imageHeight" type="text" class="form-control" id="image-height" placeholder="Enter value in pixels">
+			</div>
+
+			<div class="col-sm-4">
+				<label for="selector">Selector</label>
+    			<input data-bind="textInput: selector" type="text" class="form-control" id="selector" placeholder="Enter css selector">
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-sm-4">
 				<label for="focal-size">Focal width</label>
     			<input data-bind="textInput: focalSize" type="text" class="form-control" id="focal-size" placeholder="Enter value in pixels">
 			</div>
@@ -34,18 +46,11 @@
 				<label for="left-edge">Left edge of focal</label>
     			<input data-bind="textInput: leftEdge" type="text" class="form-control" id="left-edge" placeholder="Enter value in pixels">
 			</div>
-		</div>
 
-		<div class="row">
-			<div class="col-sm-6">
-				<label for="selector">Selector</label>
-    			<input data-bind="textInput: selector" type="text" class="form-control" id="selector" placeholder="Enter css selector">
-			</div>
-
-			<div class="col-sm-6">
+			<div class="col-sm-4">
 				<label for="banner-image">Pick banner image</label>
 				<input id="banner-image" data-bind="event: { change: setBannerImage }" type="file">
-			</div>
+			</div>			
 		</div>		
 
 		<div>
