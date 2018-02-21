@@ -14171,17 +14171,16 @@ var useHilbert = true;
 var timer = d3.interval(() => {
     var depth = saw(i, [min, max]);
     var n = Math.pow(2, depth);
-    // if (useHilbert) {
-    //     update(applyCurve(hilbert.d2xy(n), depth, max));
-    //     useHilbert = false;
-    // } else {
-    //     update(applyCurve(zOrder.d2xy, depth, max));
-    //     useHilbert = true;
-    //     i++;
-    // }
-    update(applyCurve(hilbert.d2xy(n), depth, max));
+    if (useHilbert) {
+        update(applyCurve(hilbert.d2xy(n), depth, max));
+        useHilbert = false;
+    } else {
+        update(applyCurve(zOrder.d2xy, depth, max));
+        useHilbert = true;
+        i++;
+    }
     // update(applyCurve(zOrder.d2xy, depth, max));
-    i++;
+    // i++;
 }, 1000);
 
 function applyCurve(d2xy, i, max) {

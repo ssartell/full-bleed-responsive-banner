@@ -14179,8 +14179,8 @@ var timer = d3.interval(() => {
     //     useHilbert = true;
     //     i++;
     // }
-    update(applyCurve(hilbert.d2xy(n), depth, max));
-    // update(applyCurve(zOrder.d2xy, depth, max));
+    // update(applyCurve(hilbert.d2xy(n), depth, max));
+    update(applyCurve(zOrder.d2xy, depth, max));
     i++;
 }, 1000);
 
