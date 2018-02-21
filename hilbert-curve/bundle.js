@@ -14167,15 +14167,20 @@ var R = __webpack_require__(585);
 var i = 0;
 var min = 1;
 var max = 6;
+var useHilbert = true;
 var timer = d3.interval(() => {
     var depth = saw(i, [min, max]);
     var n = Math.pow(2, depth);
-    if (i % 2 === 0) {
+    if (useHilbert) {
         update(applyCurve(hilbert.d2xy(n), depth, max));
+        useHilbert = false;
     } else {
         update(applyCurve(zOrder.d2xy, depth, max));
+        useHilbert = true;
+        i++;
     }
-    i++;
+    // update(applyCurve(zOrder.d2xy, depth, max));
+    // i++;
 }, 1000);
 
 function applyCurve(d2xy, i, max) {
