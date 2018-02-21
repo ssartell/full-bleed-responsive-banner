@@ -14238,7 +14238,7 @@ function update(lines) {
         .attr('stroke-width', strokeWidth)
         .attr('stroke-linecap', 'square')
         .transition()
-            .duration(1000)
+            .duration(500)
             .attr('d', d => line(d));
 }
 
