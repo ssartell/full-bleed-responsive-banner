@@ -14160,6 +14160,7 @@ var where = /*#__PURE__*/Object(__WEBPACK_IMPORTED_MODULE_0__internal_curry2__["
 /***/ (function(module, exports, __webpack_require__) {
 
 var hilbert = __webpack_require__(292);
+var zOrder = __webpack_require__(785);
 var d3 = __webpack_require__(293);
 var R = __webpack_require__(585);
 
@@ -14167,29 +14168,34 @@ var i = 0;
 var min = 1;
 var max = 6;
 var timer = d3.interval(() => {
-    var n = saw(i, [min, max]);
-    update(hilbertLines(n, max));
+    var depth = saw(i, [min, max]);
+    var n = Math.pow(2, depth);
+    if (i % 2 === 0) {
+        update(applyCurve(hilbert.d2xy(n), depth, max));
+    } else {
+        update(applyCurve(zOrder.d2xy, depth, max));
+    }
     i++;
 }, 1000);
 
-function hilbertLines(i, max) {
+function applyCurve(d2xy, i, max) {
+    // create points
     var n = Math.pow(2, i);
     var count = n * n;
+    var points = R.range(0, count).map(d2xy);
 
-    var points = R.range(0, count).map(x => hilbert.d2xy(n, x));
-
+    // normalize them
     var normalize = d3.scaleLinear()
         .domain(d3.extent(R.flatten(points)))
         .range([0, 1]);
-
     points = points.map(x => x.map(normalize));
     
+    // add hidden points
     var maxN = Math.pow(2, max);
     var maxCount = maxN * maxN;
     points = R.chain(x => R.repeat(x, maxCount / count), points);
 
-    var lines = pointsToLines(points);
-    return lines;
+    return pointsToLines(points);
 }
 
 function update(lines) {
@@ -14227,26 +14233,11 @@ function update(lines) {
         .attr('stroke-width', strokeWidth)
         .attr('stroke-linecap', 'square')
         .transition()
-            .duration(1000)
+            .duration(1500)
             .attr('d', d => line(d));
 }
 
 var pointsToLines = R.converge(R.zip, [R.init, R.tail]);
-
-function interpolate(p1, p2, n) {
-    if (n <= 1) return [p1, p2];
-
-    var points = [];
-    for(var i = 0; i <= n; i++) {
-        var di = i / n;
-        points.push([
-            p1[0] * (1 - di) + p2[0] * di,
-            p1[1] * (1 - di) + p2[1] * di,
-        ])
-    }
-
-    return points;
-}
 
 function saw(i, extent) {
     var min = extent[0];
@@ -14257,7 +14248,9 @@ function saw(i, extent) {
 
 /***/ }),
 /* 292 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+var R = __webpack_require__(585);
 
 function d2xy(n, d) {
     var [x, y] = [0, 0];
@@ -14295,8 +14288,8 @@ function rotate(n, x, y, regionX, regionY) {
 }
 
 module.exports = {
-    d2xy,
-    xy2d
+    d2xy: R.curry(d2xy),
+    xy2d: R.curry(xy2d)
 };
 
 
@@ -36567,6 +36560,45 @@ var zipWith = /*#__PURE__*/Object(__WEBPACK_IMPORTED_MODULE_0__internal_curry3__
   return rv;
 });
 /* harmony default export */ __webpack_exports__["a"] = (zipWith);
+
+/***/ }),
+/* 785 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var R = __webpack_require__(585);
+
+function xy2d(x, y) {
+    return part1by1(x) | (part1by1(y) << 1);
+}
+
+
+function d2xy(n) {
+    return [unpart1by1(n), unpart1by1(n >> 1)];
+}
+
+function part1by1(n) {
+    n &= 0x0000ffff
+    n = (n | (n << 8)) & 0x00FF00FF;
+    n = (n | (n << 4)) & 0x0F0F0F0F;
+    n = (n | (n << 2)) & 0x33333333;
+    n = (n | (n << 1)) & 0x55555555;
+    return n;
+}
+
+function unpart1by1(n) {
+    n &= 0x55555555;
+    n = (n ^ (n >> 1)) & 0x33333333;
+    n = (n ^ (n >> 2)) & 0x0f0f0f0f;
+    n = (n ^ (n >> 4)) & 0x00ff00ff;
+    n = (n ^ (n >> 8)) & 0x0000ffff;
+    return n;
+}
+
+module.exports = {
+    d2xy: R.curry(d2xy),
+    xy2d: R.curry(xy2d)
+};
+
 
 /***/ })
 /******/ ]);
