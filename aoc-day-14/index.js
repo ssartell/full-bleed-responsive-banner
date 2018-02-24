@@ -14237,6 +14237,7 @@ document.getElementById('stop').onclick = function () {
 };
 
 document.getElementById('reset').onclick = function () {
+    stop = true;
     svg.selectAll('g').remove();
     init(grid);
 };
