@@ -16199,7 +16199,7 @@ function getCell(x, y) {
 // state ************************************************************
 var strategy = day14.stratgies.top;
 var currentColors = rainbowColors;
-var start = {x: 0, y: 0};
+var start = { x: 0, y: 0 };
 
 init(cells);
 
@@ -16267,6 +16267,12 @@ document.getElementsByName("strategy").forEach(x => x.onchange = function (e) {
             break;
         case "random":
             strategy = day14.stratgies.random;
+            break;
+        case "hilbert":
+            strategy = day14.stratgies.hilbert;
+            break;
+        case "zorder":
+            strategy = day14.stratgies.zOrder;
             break;
     }
 });
@@ -37802,6 +37808,8 @@ var R = __webpack_require__(135);
 var knot = __webpack_require__(793);
 var M = __webpack_require__(794);
 var EventEmitter = __webpack_require__(819);
+var hilbert = __webpack_require__(820);
+var zOrder = __webpack_require__(821);
 
 var toHashes = x => R.map(y => knot(`${x}-${y}`), R.range(0, 128));
 var parseInput = R.pipe(R.trim, toHashes);
@@ -37852,11 +37860,13 @@ var start = (blocks, strategy, startCell) => {
                 events.emit('draw', pos.x, pos.y, regions);
             }
 
+            i++;
+
             //var neighbors = [[0, 1], [1, 0], [-1, 0], [0, -1]];
             var neighbors = R.sortBy(Math.random, [[1, 0], [-1, 0], [0, 1], [0, -1]]);
 
             for (var neighbor of neighbors) {
-                var newPos = { x: pos.x + neighbor[0], y: pos.y + neighbor[1], fromRegion: currentValue === 1, i: i++ };
+                var newPos = { x: pos.x + neighbor[0], y: pos.y + neighbor[1], fromRegion: currentValue === 1, i: i };
                 if (inBounds(newPos)) queue.push(newPos);
             }
         }
@@ -37898,8 +37908,10 @@ var stratgies = {
     circle: (a, b) => Math.hypot(a.x - origin.x, a.y - origin.y) < Math.hypot(b.x - origin.x, b.y - origin.y),
     diamond: (a, b) => Math.abs(a.x - origin.x) + Math.abs(a.y - origin.y) < Math.abs(b.x - origin.x) + Math.abs(b.y - origin.y),
     random: (a, b) => Math.round(Math.random()),
-    weird: (a, b) => a.x + a.y > b.x + b.y
-}
+    weird: (a, b) => a.x + a.y > b.x + b.y,
+    hilbert: (a, b) => hilbert.xy2d(128, a.x, a.y) < hilbert.xy2d(128, b.x, b.y),
+    zOrder: (a, b) => zOrder.xy2d(a.x, a.y) < zOrder.xy2d(b.x, b.y)
+};
 
 module.exports = {
     onDraw,
@@ -44740,6 +44752,92 @@ function isObject(arg) {
 function isUndefined(arg) {
   return arg === void 0;
 }
+
+
+/***/ }),
+/* 820 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var R = __webpack_require__(135);
+
+function d2xy(n, d) {
+    var [x, y] = [0, 0];
+    var t = d;
+
+    for(var s = 1; s < n; s *= 2) {
+        var rx = (t >> 1) & 1; // second bit is set
+        var ry = (t ^ rx) & 1; // first bit XOR second bit
+        [x, y] = rotate(s, x, y, rx, ry);
+        [x, y] = [x + s * rx, y + s * ry];
+        t = t >>> 2;
+    }
+
+    return [x, y];
+}
+
+function xy2d (n, x, y) {
+    var d = 0;
+    for (var s = n / 2; s >= 1; s /= 2) {
+        var rx = (x & s) ? 1 : 0;
+        var ry = (y & s) ? 1 : 0;
+        d += s * s * ((3 * rx) ^ ry);
+        [x, y] = rotate(s, x, y, rx, ry);
+    }
+    return d;
+}
+
+function rotate(n, x, y, regionX, regionY) {
+    if (regionY === 1) 
+        return [x, y]; // top regions don't change
+
+    return regionX === 0 
+        ? [y, x] // rotate bottom left
+        : [n - 1 - y, n - 1 - x]; // flip and rotate bottom right
+}
+
+module.exports = {
+    d2xy: R.curry(d2xy),
+    xy2d: R.curry(xy2d)
+};
+
+
+/***/ }),
+/* 821 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var R = __webpack_require__(135);
+
+function xy2d(x, y) {
+    return part1by1(x) | (part1by1(y) << 1);
+}
+
+
+function d2xy(n) {
+    return [unpart1by1(n), unpart1by1(n >> 1)];
+}
+
+function part1by1(n) {
+    n &= 0x0000ffff
+    n = (n | (n << 8)) & 0x00FF00FF;
+    n = (n | (n << 4)) & 0x0F0F0F0F;
+    n = (n | (n << 2)) & 0x33333333;
+    n = (n | (n << 1)) & 0x55555555;
+    return n;
+}
+
+function unpart1by1(n) {
+    n &= 0x55555555;
+    n = (n ^ (n >> 1)) & 0x33333333;
+    n = (n ^ (n >> 2)) & 0x0f0f0f0f;
+    n = (n ^ (n >> 4)) & 0x00ff00ff;
+    n = (n ^ (n >> 8)) & 0x0000ffff;
+    return n;
+}
+
+module.exports = {
+    d2xy: R.curry(d2xy),
+    xy2d: R.curry(xy2d)
+};
 
 
 /***/ })
