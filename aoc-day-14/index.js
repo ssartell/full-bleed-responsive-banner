@@ -16172,20 +16172,19 @@ var blackAndWhite = d3.scaleLinear()
 
 function init(cells) {
     var groups = svg
-    .selectAll('g')
-    .data(cells)
-    .enter().append('g');
+        .selectAll('g')
+        .data(cells)
+        .enter().append('g');
 
-var rect = groups.selectAll('rect')
-    .data(d => d);
+    var rect = groups.selectAll('rect')
+        .data(d => d);
 
-rect.enter().append('rect')
-    .attr('fill', (d, i) => blackAndWhite(d.val))
-    .attr('x', d => scale(d.x))
-    .attr('y', d => scale(d.y))
-    .attr('width', d => 5)
-    .attr('height', d => 5)
-    .attr('height', d => 5);
+    rect.enter().append('rect')
+        .attr('fill', (d, i) => blackAndWhite(d.val))
+        .attr('x', d => `${d.x / n * 100}%`)
+        .attr('y', d => `${d.y / n * 100}%`)
+        .attr('width', d => `${1 / n * 100}%`)
+        .attr('height', d => `${1 / m * 100}%`);
 }
 
 // state ************************************************************
@@ -16200,11 +16199,12 @@ var stopButton = document.getElementById('stop');
 var resetButton = document.getElementById('reset');
 
 day14.onDraw(function (x, y, i) {
-    svg.select(`g:nth-child(${x + 1})`).select(`rect:nth-child(${y + 1})`)
+    svg.select(`g:nth-child(${x + 1})`)
+        .select(`rect:nth-child(${y + 1})`)
         .attr('fill', currentColors(i));
 });
 
-day14.onStop(function() {
+day14.onStop(function () {
     startButton.removeAttribute('disabled');
     stopButton.setAttribute('disabled', 'disabled');
     resetButton.removeAttribute('disabled');
