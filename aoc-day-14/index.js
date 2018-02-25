@@ -16265,6 +16265,9 @@ document.getElementsByName("strategy").forEach(x => x.onchange = function (e) {
         case "weird":
             strategy = day14.stratgies.weird;
             break;
+        case "random":
+            strategy = day14.stratgies.random;
+            break;
     }
 });
 
@@ -37824,6 +37827,7 @@ var start = (blocks, strategy, startCell) => {
         if (b.fromRegion && blocks[b.x][b.y] === 1) return false;
         return strategy(a, b);
     }));
+
     startCell.fromRegion = false;
     queue.push(startCell);
     var i = 0;
@@ -37893,7 +37897,7 @@ var stratgies = {
     top: (a, b) => (a.y === b.y && a.x < b.x) || (a.y < b.y),
     circle: (a, b) => Math.hypot(a.x - origin.x, a.y - origin.y) < Math.hypot(b.x - origin.x, b.y - origin.y),
     diamond: (a, b) => Math.abs(a.x - origin.x) + Math.abs(a.y - origin.y) < Math.abs(b.x - origin.x) + Math.abs(b.y - origin.y),
-    random: (a, b) => false,
+    random: (a, b) => Math.round(Math.random()),
     weird: (a, b) => a.x + a.y > b.x + b.y
 }
 
