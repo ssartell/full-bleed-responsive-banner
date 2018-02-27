@@ -14921,20 +14921,6 @@ var svg = d3.select('svg');
 var width = +element.clientWidth;
 var height = +element.clientHeight;
 
-var scale = d3.scaleLinear()
-    .domain([0, n])
-    .range([0, width]);
-
-var rainbowColors = d3.scaleSequential()
-    .domain([2, 1087])
-    .interpolator(d3.interpolateRainbow);
-
-var randomScale = d3.scaleOrdinal()
-    .domain([2, 1087])
-    .range(d3.shuffle(R.range(2, 1088)));
-
-var randomColors = R.pipe(randomScale, rainbowColors);
-
 var blackAndWhite = d3.scaleLinear()
     .domain([0, 1])
     .range(["black", "white"]);
@@ -14968,15 +14954,28 @@ function getCell(x, y) {
 
 var shouldStop;
 function draw(regions) {
+    var rainbowColors = d3.scaleSequential()
+            .domain([1, regions.length])
+            .interpolator(d3.interpolateRainbow);
+
+    var randomScale = d3.scaleOrdinal()
+        .domain([1, regions.length])
+        .range(d3.shuffle(R.range(0, regions.length)));
+
+    var colors = {
+        'rainbow': rainbowColors,
+        'random': R.pipe(randomScale, rainbowColors)
+    };
+
     shouldStop = false;
     var i = 0;
-    var intervalId = setInterval(function() {
+    var intervalId = setInterval(function () {
         if (i >= regions.length || shouldStop) {
             clearInterval(intervalId);
             stop();
         }
-        for(var cell of regions[i]) {
-            getCell(cell.x, cell.y).attr('fill', currentColors(cell.i));
+        for (var cell of regions[i]) {
+            getCell(cell.x, cell.y).attr('fill', colors[currentColors](cell.i));
         }
         i++;
     }, 0);
@@ -14990,8 +14989,8 @@ function stop() {
 }
 
 // state ************************************************************
-var strategy = day14.stratgies.top;
-var currentColors = rainbowColors;
+var strategy = 'top';
+var currentColors = 'rainbow';
 var start = { x: 0, y: 0 };
 
 init(cells);
@@ -15002,7 +15001,7 @@ var stopButton = document.getElementById('stop');
 var resetButton = document.getElementById('reset');
 
 startButton.onclick = function () {
-    var regions = day14.start(grid, strategy, start);
+    var regions = day14.start(grid, day14.stratgies[strategy], start);
     draw(regions);
     startButton.setAttribute('disabled', 'disabled');
     stopButton.removeAttribute('disabled');
@@ -15019,46 +15018,11 @@ resetButton.onclick = function () {
 };
 
 document.getElementsByName("color").forEach(x => x.onchange = function (e) {
-    switch (e.target.value) {
-        case "rainbow":
-            currentColors = rainbowColors;
-            break;
-        case "random":
-            currentColors = randomColors;
-            break;
-    }
+    currentColors = e.target.value;
 });
 
 document.getElementsByName("strategy").forEach(x => x.onchange = function (e) {
-    switch (e.target.value) {
-        case "top":
-            strategy = day14.stratgies.top;
-            break;
-        case "last":
-            strategy = day14.stratgies.last;
-            break;
-        case "first":
-            strategy = day14.stratgies.first;
-            break;
-        case "circle":
-            strategy = day14.stratgies.circle;
-            break;
-        case "diamond":
-            strategy = day14.stratgies.diamond;
-            break;
-        case "weird":
-            strategy = day14.stratgies.weird;
-            break;
-        case "random":
-            strategy = day14.stratgies.random;
-            break;
-        case "hilbert":
-            strategy = day14.stratgies.hilbert;
-            break;
-        case "zorder":
-            strategy = day14.stratgies.zOrder;
-            break;
-    }
+    strategy = e.target.value;
 });
 
 /***/ }),
@@ -36611,12 +36575,12 @@ var start = (blocks, strategy, startCell) => {
     var visited = {};
 
     var queue = new M.MinHeap(R.comparator((a, b) => {
-        if (a.fromRegion && blocks[a.x][a.y] === 1) return true;
-        if (b.fromRegion && blocks[b.x][b.y] === 1) return false;
+        if (a.foundFromCellInRegion && blocks[a.x][a.y] === 1) return true;
+        if (b.foundFromCellInRegion && blocks[b.x][b.y] === 1) return false;
         return strategy(a, b);
     }));
 
-    startCell.fromRegion = false;
+    startCell.foundFromCellInRegion = false;
     queue.push(startCell);
 
     var i = 0;
@@ -36629,7 +36593,7 @@ var start = (blocks, strategy, startCell) => {
         visited[key] = true;
 
         var currentValue = blocks[pos.x][pos.y];
-        if (currentValue === 1 && !pos.fromRegion) {
+        if (currentValue === 1 && !pos.foundFromCellInRegion) {
             regions++;
             if (currentRegion.length > 0) {
                 buffer.push(currentRegion);
@@ -36640,13 +36604,12 @@ var start = (blocks, strategy, startCell) => {
             currentRegion.push({ x: pos.x, y: pos.y, i: regions });
         }
 
-        i++;
-
         //var neighbors = [[0, 1], [1, 0], [-1, 0], [0, -1]];
         var neighbors = R.sortBy(Math.random, [[1, 0], [-1, 0], [0, 1], [0, -1]]);
 
         for (var neighbor of neighbors) {
-            var newPos = { x: pos.x + neighbor[0], y: pos.y + neighbor[1], fromRegion: currentValue === 1, i: i };
+            i++;
+            var newPos = { x: pos.x + neighbor[0], y: pos.y + neighbor[1], foundFromCellInRegion: currentValue === 1, i: i };
             if (inBounds(newPos)) queue.push(newPos);
         }
     }
