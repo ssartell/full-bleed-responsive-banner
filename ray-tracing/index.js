@@ -15157,22 +15157,34 @@ var min = R.reduce(R.min, Infinity);
 var max = R.reduce(R.max, -Infinity);
 
 var surfaces = {
-    slightlyRough: (normal, point) => vec.normalize(R.map(x => x + Math.random() / 20, normal)),
-    veryRough: (normal, point) => vec.normalize(R.map(x => x + Math.random() / 5, normal)),
+    slightlyRough: (normal, point) => vec.normalize(R.map(x => x + (Math.random() - .5) / 20, normal)),
+    veryRough: (normal, point) => vec.normalize(R.map(x => x + (Math.random() - .5) / 5, normal)),
     smooth: (normal, point) => normal
 };
 
 var scene = {
     camera: {
-        position: [0, 0, 0],
-        lookAt: [0, 0, 1],
+        position: [0, .5, 0],
+        lookAt: [0, -.1, 1],
         fov: 90
     },
     shapes: [
         {
             type: 'plane',
-            point: [0, -5, 0],
-            normal: [0, 1, 0]
+            point: [0, -1.5, 10],
+            normal: vec.normalize([0, 1, 0]),
+            // brass
+            // ambient: [.33, .22, .03],
+            // diffuse: [.78, .57, .11],
+            // specular: [.99, .94, .81],
+            // exponent: 27.8
+
+            // black plastic
+            ambient: [.0, .0, .0],
+            diffuse: [.01, .01, .01],
+            specular: [.5, .5, .5],
+            exponent: 32,
+            surface: surfaces.slightlyRough
         },
         {
             type: 'sphere',
@@ -15204,7 +15216,7 @@ var scene = {
         },
         {
             type: 'sphere',
-            center: [.35, -.35, 1.5],
+            center: [.5, -.35, 1.5],
             radius: .5,
             // silver
             ambient: [.19, .19, .19],
@@ -15220,51 +15232,87 @@ var scene = {
             intensity: [1, 1, 1]
         },
         {
-            position: [8, -2, 4],
-            intensity: [0, 0, 1]
+            position: [8, -1.25, 4],
+            intensity: [0, 0, .7]
         },
         {
-            position: [-2, -5, 2],
+            position: [-2, -1.25, 2],
             intensity: [.25, 0, 0]
-        }
+        },
     ],
     ambient: [.1, .1, .5]
 };
 
 var raytrace = (function () {
-    var fovRadians = (scene.camera.fov / 2) * Math.PI / 180;
-    var aspectRatio = height / width;
-    var halfWidth = Math.tan(fovRadians);
-    var halfHeight = aspectRatio * halfWidth;
-    var camerawidth = halfWidth * 2;
-    var cameraheight = halfHeight * 2;
-    var pixelWidth = camerawidth / (width - 1);
-    var pixelHeight = cameraheight / (height - 1);
+    var atInfinity = { t: Infinity };
 
-    function computePixelColor(scene, screenCoords) {
+    var intersect = {
+        sphere: intersectSphere,
+        plane: intersectPlane
+    };
+
+    function renderScene(scene, width, height) {
+        var fovRadians = (scene.camera.fov / 2) * Math.PI / 180;
+        var aspectRatio = height / width;
+        var halfWidth = Math.tan(fovRadians);
+        var halfHeight = aspectRatio * halfWidth;
+        var camerawidth = halfWidth * 2;
+        var cameraheight = halfHeight * 2;
+        var pixelWidth = camerawidth / (width - 1);
+        var pixelHeight = cameraheight / (height - 1);
+
         var eyeVector = vec.normalize(vec.subtract(scene.camera.lookAt, scene.camera.position));
-        vRight = vec.crossProduct(vec.up, eyeVector);
-        vUp = vec.crossProduct(eyeVector, vRight);
+        var vRight = vec.crossProduct(vec.up, eyeVector);
+        var vUp = vec.crossProduct(eyeVector, vRight);
 
-        var xComponent = vec.scale(vRight, (screenCoords[0] * pixelWidth) - halfWidth);
-        var yComponent = vec.scale(vUp, halfHeight - (screenCoords[1] * pixelHeight));
+        var traceScreenCoords = function (x, y) {
+            var xComponent = vec.scale(vRight, (x * pixelWidth) - halfWidth);
+            var yComponent = vec.scale(vUp, halfHeight - (y * pixelHeight));
 
-        var ray = {
-            point: scene.camera.position,
-            vector: vec.normalize(vec.add(eyeVector, vec.add(xComponent, yComponent)))
+            var ray = {
+                point: scene.camera.position,
+                vector: vec.normalize(vec.add(eyeVector, vec.add(xComponent, yComponent)))
+            };
+
+            var color = traceRay(scene, ray);
+            var scaledColor = vec.scale(vec.clamp(color, [0, 1]), 255);
+            return scaledColor;
         };
 
-        var color = traceRay(scene, ray);
+        function antialias(x, y) {
+            var c1 = traceScreenCoords(x + .25, y + .25);
+            var c2 = traceScreenCoords(x + .75, y + .25);
+            var c3 = traceScreenCoords(x + .25, y + .75);
+            var c4 = traceScreenCoords(x + .75, y + .75);
 
-        return vec.scale(vec.clamp(color, [0, 1]), 255)
+            return vec.scale(vec.add(vec.add(c1, c2), vec.add(c3, c4)), .25);
+        }
+
+        var result = [];
+        for (var y = 0; y < height; y++) {
+            result[y] = [];
+            for (var x = 0; x < width; x++) {
+                result[y][x] = traceScreenCoords(x, y);
+                // result[y][x] = antialias(x, y);
+            }
+        }
+
+        return result;
     }
 
-    function traceRay(scene, ray, depth) {
-        depth = depth || 0;
+    function traceRay(scene, ray, depth, excludedShapes) {
         if (depth > 3) return scene.ambient;
 
-        var intersection = intersectShapes(scene, ray);
-        if (!intersection) return scene.ambient;
+        var intersection = scene.shapes
+            .filter(shape => excludedShapes === undefined || excludedShapes.indexOf(shape) === -1)
+            .reduce((closest, shape) => {
+                var intersection = intersect[shape.type](ray, shape);
+                return (intersection.t > 0 && intersection.t < closest.t)
+                    ? intersection
+                    : closest;
+            }, atInfinity);
+
+        if (!Number.isFinite(intersection.t)) return scene.ambient;
 
         var lighting = colorAtIntersection(scene, intersection);
 
@@ -15273,30 +15321,22 @@ var raytrace = (function () {
             vector: vec.reflect(ray.vector, intersection.normal)
         };
 
-        var reflection = traceRay(scene, reflectedRay, ++depth);
+        var reflection = traceRay(scene, reflectedRay, ++depth, [intersection.shape]);
 
         return vec.add(lighting, vec.multiply(intersection.shape.specular, reflection));
     }
 
-    function intersectShapes(scene, ray) {
-        var intersections = scene.shapes
-            .map(shape => {
-                switch (shape.type) {
-                    case 'sphere':
-                        return intersectSphere(ray, shape);
-                    case 'plane':
-                        return intersectPlane(ray, shape);
-                }
-            })
-            .filter(x => x !== null && Number.isFinite(x.t))
-            .sort((a, b) => a.t - b.t);
+    function intersectPlane(ray, shape) {
+        var rayToPlane = vec.subtract(shape.point, ray.point);
+        var dot = vec.dotProduct(ray.vector, shape.normal);
+        var t = vec.dotProduct(rayToPlane, shape.normal) / dot;
+        if (t < 0) return atInfinity;
 
-        if (intersections.length === 0) return null;
-        return intersections[0];
-    }
+        var pointAtTime = vec.add(ray.point, vec.scale(ray.vector, t));
+        var normal = (dot > 0) ? vec.scale(shape.normal, -1) : shape.normal;
+        normal = shape.surface(normal, pointAtTime);
 
-    function intersectPlane(ray, plane) {
-        return null;
+        return { shape, t, normal, pointAtTime };
     }
 
     function intersectSphere(ray, shape) {
@@ -15306,8 +15346,8 @@ var raytrace = (function () {
         var c = vec.dotProduct(L, L) - shape.radius * shape.radius;
 
         var t = solveQuadratic(a, b, c);
-        if (!Number.isFinite(t) || t < .001)
-            return null;
+        if (!Number.isFinite(t))
+            return atInfinity;
 
         var pointAtTime = vec.add(ray.point, vec.scale(ray.vector, t));
 
@@ -15318,12 +15358,11 @@ var raytrace = (function () {
     }
 
     function colorAtIntersection(scene, intersection) {
-        var color = [0, 0, 0];
-
-        var pointToCamera = vec.normalize(vec.subtract(scene.camera.position, intersection.pointAtTime));
         var shape = intersection.shape;
         var normal = intersection.normal;
-        var upCos = vec.dotProduct(normal, [0, 1, 0]);
+
+        // ambient
+        var color = vec.multiply(scene.ambient, shape.ambient);
 
         for (var light of scene.lights) {
             var pointToLight = vec.normalize(vec.subtract(light.position, intersection.pointAtTime));
@@ -15335,15 +15374,13 @@ var raytrace = (function () {
 
             // specular
             if (cos > 0) {
+                var pointToCamera = vec.normalize(vec.subtract(scene.camera.position, intersection.pointAtTime));
                 var reflection = vec.normalize(vec.add(pointToLight, pointToCamera));
                 var reflectionCos = Math.max(0, vec.dotProduct(normal, reflection));
                 var specular = vec.scale(vec.multiply(light.intensity, shape.specular), Math.pow(reflectionCos, shape.exponent));
                 color = vec.add(color, specular);
             }
         }
-
-        // ambient
-        color = vec.add(color, vec.multiply(scene.ambient, shape.ambient));
 
         return color;
     }
@@ -15364,7 +15401,7 @@ var raytrace = (function () {
         }
     }
 
-    return R.curry(computePixelColor);
+    return renderScene;
 }());
 
 // renderContour(createGrid(width, height, raytrace(scene)), 20);
@@ -15383,11 +15420,13 @@ function renderCanvas(width, height, f) {
     ctx.mozImageSmoothingEnabled = false;
     ctx.imageSmoothingEnabled = false;
 
+    var img = raytrace(scene, width, height);
+
     var i = 0;
 
     for (var y = 0; y < height; y++) {
         for (var x = 0; x < width; x++) {
-            var color = f([x, y]);
+            var color = img[y][x];
             i = (x * 4) + (y * width * 4);
             data.data[i + 0] = color[0];
             data.data[i + 1] = color[1];
@@ -37251,9 +37290,19 @@ var xi = 0;
 var yi = 1;
 var zi = 2;
 
-var add = R.zipWith(R.add);
-var subtract = R.zipWith(R.subtract);
-var multiply = R.zipWith(R.multiply);
+var zipWith = function(f) {
+    return function(a, b) {
+        var result = [];
+        for(var i = 0; i < a.length; i++) {
+            result.push(f(a[i], b[i]));
+        }
+        return result;
+    }
+};
+
+var add = zipWith(R.add);
+var subtract = zipWith(R.subtract);
+var multiply = zipWith(R.multiply);
 var dotProduct = R.pipe(multiply, R.sum);
 var crossProduct = (a, b) => [
     a[yi] * b[zi] - a[zi] * b[yi],
