@@ -275,7 +275,7 @@ function renderScene(scene, width, height) {
             vector: vec.normalize(vec.add(eyeVector, vec.add(xComponent, yComponent)))
         };
 
-        var color = traceRay(scene, ray);
+        var color = traceRay(scene, ray, 0);
         var scaledColor = vec.scale(vec.clamp(color, [0, 1]), 255);
         return scaledColor;
     };
@@ -301,7 +301,6 @@ function renderScene(scene, width, height) {
 }
 
 function traceRay(scene, ray, depth, excludedShape) {
-    depth = depth || 0;
     if (depth > scene.settings.reflectionDepth) 
         return scene.ambient;
 
