@@ -60,16 +60,28 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 295);
+/******/ 	return __webpack_require__(__webpack_require__.s = 19);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 295:
+/***/ 19:
 /***/ (function(module, exports, __webpack_require__) {
 
-var raytracer = __webpack_require__(796);
-var scene = __webpack_require__(797);
+var raytracer = __webpack_require__(20);
+var scene = __webpack_require__(31);
+
+var canvas = document.getElementById('c');
+var width = canvas.clientWidth;
+var height = canvas.clientHeight;
+canvas.width = width;
+canvas.height = height;
+
+var ctx = canvas.getContext('2d');
+// var data = ctx.getImageData(0, 0, width, height);
+ctx.webkitImageSmoothingEnabled = false;
+ctx.mozImageSmoothingEnabled = false;
+ctx.imageSmoothingEnabled = false;
 
 render(scene);
 
@@ -77,173 +89,36 @@ var textarea = document.getElementById('json');
 textarea.value = JSON.stringify(scene, null, 3);
 
 var renderButton = document.getElementById('render');
-renderButton.onclick = function() {
+renderButton.onclick = function () {
     var scene = JSON.parse(textarea.value);
     render(scene);
 };
 
 function render(scene) {
-    var canvas = document.getElementById('c');
-    var width = canvas.clientWidth;
-    var height = canvas.clientHeight;
-    canvas.width = width;
-    canvas.height = height;
-
-    var ctx = canvas.getContext('2d');
-    var data = ctx.getImageData(0, 0, width, height);
-    ctx.webkitImageSmoothingEnabled = false;
-    ctx.mozImageSmoothingEnabled = false;
-    ctx.imageSmoothingEnabled = false;
-
     var img = raytracer.renderScene(scene, width, height);
-
-    var i = 0;
     for (var y = 0; y < height; y++) {
-        for (var x = 0; x < width; x++) {
-            var color = img[y][x];
-            i = (x * 4) + (y * width * 4);
-            data.data[i + 0] = color[0];
-            data.data[i + 1] = color[1];
-            data.data[i + 2] = color[2];
-            data.data[i + 3] = 255;
-        }
+        setTimeout(function (y) {
+            var imageData = ctx.createImageData(width, 1);
+            for (var x = 0; x < width; x++) {
+                var color = img.next().value;
+                i = x * 4;
+                imageData.data[i + 0] = color[0];
+                imageData.data[i + 1] = color[1];
+                imageData.data[i + 2] = color[2];
+                imageData.data[i + 3] = 255;
+            }
+            ctx.putImageData(imageData, 0, y);
+        }.bind(null, y), 0);
     }
-
-    ctx.putImageData(data, 0, 0);
 }
 
 /***/ }),
 
-/***/ 794:
-/***/ (function(module, exports) {
-
-function add(a, b) {
-    return [
-        a[0] + b[0],
-        a[1] + b[1],
-        a[2] + b[2],
-    ];
-}
-
-function subtract(a, b) {
-    return [
-        a[0] - b[0],
-        a[1] - b[1],
-        a[2] - b[2],
-    ];
-}
-
-function multiply(a, b) {
-    return [
-        a[0] * b[0],
-        a[1] * b[1],
-        a[2] * b[2],
-    ]
-}
-
-function dotProduct(a, b) {
-    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-}
-
-function crossProduct(a, b) {
-    return [
-        a[1] * b[2] - a[2] * b[1],
-        a[2] * b[0] - a[0] * b[2],
-        a[0] * b[1] - a[1] * b[0],
-    ];
-}
-
-function magnitude(a) {
-    var x = a[0], y = a[1], z = a[2]
-    return Math.sqrt(x * x + y * y + z * z);
-}
-
-function scale(a, s) {
-    return [
-        a[0] * s,
-        a[1] * s,
-        a[2] * s
-    ];
-}
-
-function normalize(a) {
-    var s = 1 / magnitude(a);
-    return [
-        a[0] * s,
-        a[1] * s,
-        a[2] * s,
-    ];
-}
-
-function clamp(a, range) {
-    var low = range[0], high = range[1];
-    return [
-        Math.max(low, Math.min(high, a[0])),
-        Math.max(low, Math.min(high, a[1])),
-        Math.max(low, Math.min(high, a[2]))
-    ];
-}
-
-function reflect(a, b) {
-    return subtract(a, scale(b, 2 * dotProduct(a, b)));
-}
-
-var up = [0, 1, 0];
-
-module.exports = {
-    add,
-    subtract,
-    multiply,
-    dotProduct,
-    crossProduct,
-    magnitude,
-    scale,
-    normalize,
-    clamp,
-    reflect,
-    up
-};
-
-/***/ }),
-
-/***/ 795:
+/***/ 20:
 /***/ (function(module, exports, __webpack_require__) {
 
-var vec = __webpack_require__(794);
-
-function slightlyRough(normal, point) {
-    return vec.normalize([
-        normal[0] + (Math.random() - .5) * .05,
-        normal[1] + (Math.random() - .5) * .05,
-        normal[2] + (Math.random() - .5) * .05,
-    ]);
-}
-
-function veryRough(normal, point) {
-    return vec.normalize([
-        normal[0] + (Math.random() - .5) * .2,
-        normal[1] + (Math.random() - .5) * .2,
-        normal[2] + (Math.random() - .5) * .2,
-    ]);
-}
-
-function smooth(normal, point) {
-    return normal;
-}
-
-module.exports = {
-    slightlyRough,
-    veryRough,
-    smooth
-};
-
-/***/ }),
-
-/***/ 796:
-/***/ (function(module, exports, __webpack_require__) {
-
-var vec = __webpack_require__(794);
-var surfaces = __webpack_require__(795);
+var vec = __webpack_require__(4);
+var surfaces = __webpack_require__(30);
 
 var atInfinity = { t: Infinity };
 
@@ -252,7 +127,7 @@ var intersect = {
     plane: intersectPlane
 };
 
-function renderScene(scene, width, height) {
+function* renderScene(scene, width, height) {
     var fovRadians = (scene.camera.fov / 2) * Math.PI / 180;
     var aspectRatio = height / width;
     var halfWidth = Math.tan(fovRadians);
@@ -293,11 +168,12 @@ function renderScene(scene, width, height) {
     for (var y = 0; y < height; y++) {
         result[y] = [];
         for (var x = 0; x < width; x++) {
-            result[y][x] = scene.settings.antiAlias ? antialias(x, y) : traceScreenCoords(x, y);
+            yield scene.settings.antiAlias ? antialias(x, y) : traceScreenCoords(x, y);
+            // result[y][x] = scene.settings.antiAlias ? antialias(x, y) : traceScreenCoords(x, y);
         }
     }
 
-    return result;
+    // return result;
 }
 
 function traceRay(scene, ray, depth, excludedShape) {
@@ -423,7 +299,40 @@ module.exports = {
 
 /***/ }),
 
-/***/ 797:
+/***/ 30:
+/***/ (function(module, exports, __webpack_require__) {
+
+var vec = __webpack_require__(4);
+
+function slightlyRough(normal, point) {
+    return vec.normalize([
+        normal[0] + (Math.random() - .5) * .05,
+        normal[1] + (Math.random() - .5) * .05,
+        normal[2] + (Math.random() - .5) * .05,
+    ]);
+}
+
+function veryRough(normal, point) {
+    return vec.normalize([
+        normal[0] + (Math.random() - .5) * .2,
+        normal[1] + (Math.random() - .5) * .2,
+        normal[2] + (Math.random() - .5) * .2,
+    ]);
+}
+
+function smooth(normal, point) {
+    return normal;
+}
+
+module.exports = {
+    slightlyRough,
+    veryRough,
+    smooth
+};
+
+/***/ }),
+
+/***/ 31:
 /***/ (function(module, exports) {
 
 module.exports = {
@@ -510,6 +419,98 @@ module.exports = {
         },
     ],
     ambient: [.1, .1, .5]
+};
+
+/***/ }),
+
+/***/ 4:
+/***/ (function(module, exports) {
+
+function add(a, b) {
+    return [
+        a[0] + b[0],
+        a[1] + b[1],
+        a[2] + b[2],
+    ];
+}
+
+function subtract(a, b) {
+    return [
+        a[0] - b[0],
+        a[1] - b[1],
+        a[2] - b[2],
+    ];
+}
+
+function multiply(a, b) {
+    return [
+        a[0] * b[0],
+        a[1] * b[1],
+        a[2] * b[2],
+    ]
+}
+
+function dotProduct(a, b) {
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
+
+function crossProduct(a, b) {
+    return [
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0],
+    ];
+}
+
+function magnitude(a) {
+    var x = a[0], y = a[1], z = a[2]
+    return Math.sqrt(x * x + y * y + z * z);
+}
+
+function scale(a, s) {
+    return [
+        a[0] * s,
+        a[1] * s,
+        a[2] * s
+    ];
+}
+
+function normalize(a) {
+    var s = 1 / magnitude(a);
+    return [
+        a[0] * s,
+        a[1] * s,
+        a[2] * s,
+    ];
+}
+
+function clamp(a, range) {
+    var low = range[0], high = range[1];
+    return [
+        Math.max(low, Math.min(high, a[0])),
+        Math.max(low, Math.min(high, a[1])),
+        Math.max(low, Math.min(high, a[2]))
+    ];
+}
+
+function reflect(a, b) {
+    return subtract(a, scale(b, 2 * dotProduct(a, b)));
+}
+
+var up = [0, 1, 0];
+
+module.exports = {
+    add,
+    subtract,
+    multiply,
+    dotProduct,
+    crossProduct,
+    magnitude,
+    scale,
+    normalize,
+    clamp,
+    reflect,
+    up
 };
 
 /***/ })
