@@ -161,18 +161,7 @@ module.exports = {
 var raytracer = __webpack_require__(2);
 var scene = __webpack_require__(4);
 
-var canvas = document.getElementById('c');
-var width = canvas.clientWidth;
-var height = canvas.clientHeight;
-canvas.width = width;
-canvas.height = height;
-
-var ctx = canvas.getContext('2d');
-ctx.webkitImageSmoothingEnabled = false;
-ctx.mozImageSmoothingEnabled = false;
-ctx.imageSmoothingEnabled = false;
-
-render(scene);
+render(scene, 'c');
 
 var textarea = document.getElementById('json');
 textarea.value = JSON.stringify(scene, null, 3);
@@ -184,6 +173,26 @@ renderButton.onclick = function () {
 };
 
 function render(scene) {
+    var visual = document.getElementById('visual');
+    
+    if (scene.settings.stereoscopic.enabled) {
+        visual.style.width = '100vw';
+        visual.style.height = '100vh';
+    } else {
+        visual.style = '';
+    }
+
+    var canvas = document.getElementById('c');
+    var width = canvas.clientWidth;
+    var height = canvas.clientHeight;
+    canvas.width = width;
+    canvas.height = height;
+
+    var ctx = canvas.getContext('2d');
+    ctx.webkitImageSmoothingEnabled = false;
+    ctx.mozImageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = false;
+
     var img = raytracer.renderScene(scene, width, height);
     for (var y = 0; y < height; y++) {
         setTimeout(function (y) {
@@ -197,7 +206,7 @@ function render(scene) {
                 imageData.data[i + 3] = 255;
             }
             ctx.putImageData(imageData, 0, y);
-        }.bind(null, y), 0);
+        }.bind(null, y), 1);
     }
 }
 
@@ -210,14 +219,14 @@ var surfaces = __webpack_require__(3);
 
 var atInfinity = { t: Infinity };
 
-var intersect = {
+var intersectFunctions = {
     sphere: intersectSphere,
     plane: intersectPlane,
     polygon: intersectPolygon
 };
 
 function* renderScene(scene, width, height) {
-    prepScene(scene);
+    prepareScene(scene);
 
     var fovRadians = (scene.camera.fov / 2) * Math.PI / 180;
     var aspectRatio = height / width;
@@ -228,16 +237,16 @@ function* renderScene(scene, width, height) {
     var pixelWidth = camerawidth / (width - 1);
     var pixelHeight = cameraheight / (height - 1);
 
-    var eyeVector = vec.normalize(vec.subtract(scene.camera.lookAt, scene.camera.position));
-    var vRight = vec.normalize(vec.crossProduct(vec.up, eyeVector));
-    var vUp = vec.normalize(vec.crossProduct(eyeVector, vRight));
+    var traceFrom2d = function (position, lookAt, x, y) {
+        var eyeVector = vec.normalize(vec.subtract(lookAt, position));
+        var vRight = vec.normalize(vec.crossProduct(vec.up, eyeVector));
+        var vUp = vec.normalize(vec.crossProduct(eyeVector, vRight));
 
-    var traceScreenCoords = function (x, y) {
         var xComponent = vec.scale(vRight, (x * pixelWidth) - halfWidth);
         var yComponent = vec.scale(vUp, halfHeight - (y * pixelHeight));
 
         var ray = {
-            point: scene.camera.position,
+            point: position,
             vector: vec.normalize(vec.add(eyeVector, vec.add(xComponent, yComponent)))
         };
 
@@ -246,48 +255,101 @@ function* renderScene(scene, width, height) {
         return scaledColor;
     };
 
-    function antialias(x, y) {
-        var c1 = traceScreenCoords(x + .25, y + .25);
-        var c2 = traceScreenCoords(x + .75, y + .25);
-        var c3 = traceScreenCoords(x + .25, y + .75);
-        var c4 = traceScreenCoords(x + .75, y + .75);
+    function antiAlias(f) {
+        return function (position, lookAt, x, y) {
+            var c1 = f(position, lookAt, x + .25, y + .25);
+            var c2 = f(position, lookAt, x + .75, y + .25);
+            var c3 = f(position, lookAt, x + .25, y + .75);
+            var c4 = f(position, lookAt, x + .75, y + .75);
 
-        return vec.scale(vec.add(vec.add(c1, c2), vec.add(c3, c4)), .25);
+            return vec.scale(vec.add(vec.add(c1, c2), vec.add(c3, c4)), .25);
+        }
+    }
+
+    function drunkMode(f, r, samples) {
+        return function (position, lookAt, x, y) {
+            color = [0, 0, 0];
+            for (var t = 0; t <= 2 * Math.PI; t += Math.PI / samples) {
+                var contribution = f(position, lookAt, x + r * Math.cos(t), y + r * Math.sin(t));
+                color = vec.add(color, contribution);
+            }
+
+            return vec.scale(color, 1 / samples);
+        }
+    }
+
+    function depthOfField(f, r, samples) {
+        return function(position, lookAt, x, y) {
+            var color = [0, 0, 0];
+
+            var eyeVector = vec.normalize(vec.subtract(lookAt, position));
+            var vRight = vec.normalize(vec.crossProduct(vec.up, eyeVector));
+            var vUp = vec.normalize(vec.crossProduct(eyeVector, vRight));
+
+            for(var t = 0; t < 2 * Math.PI; t += 2 * Math.PI / samples) {
+                var leftRight = vec.scale(vRight, r * Math.cos(t));
+                var upDown = vec.scale(vUp, r * Math.sin(t));
+                var newPosition = vec.add(position, vec.add(leftRight, upDown));
+                var contribution = f(newPosition, lookAt, x, y);
+                color = vec.add(color, contribution);
+            }
+
+            return vec.scale(color, 1 / samples);
+        }
+    }
+
+    function stereoscopic(f, r) {
+        return function(position, lookAt, x, y) {
+            var eyeVector = vec.normalize(vec.subtract(lookAt, position));
+            var vRight = vec.normalize(vec.crossProduct(vec.up, eyeVector));
+            var vUp = vec.normalize(vec.crossProduct(eyeVector, vRight));
+
+            var dir = scene.settings.stereoscopic.vr ? -1 : 1;
+
+            if (x < width / 2) {
+                var leftRight = vec.scale(vRight, r * dir);
+                var newPosition = vec.add(position, leftRight);
+                return f(newPosition, lookAt, x * 2, y * 2 - height / 2);
+            } else {
+                var leftRight = vec.scale(vRight, -r * dir);
+                var newPosition = vec.add(position, leftRight);
+                return f(newPosition, lookAt, x * 2 % width, y * 2 - height / 2);
+            }
+        }
+    }
+
+    var trace = traceFrom2d;
+
+    if (scene.settings.stereoscopic.enabled) {
+        trace = stereoscopic(trace, scene.settings.stereoscopic.radius);
+    }
+
+    if (scene.settings.depthOfField.enabled) {
+        trace = depthOfField(trace, scene.settings.depthOfField.radius, scene.settings.depthOfField.samples);
+    }
+
+    if (scene.settings.antiAlias) {
+        trace = antiAlias(trace);
     }
 
     var result = [];
     for (var y = 0; y < height; y++) {
         result[y] = [];
         for (var x = 0; x < width; x++) {
-            yield scene.settings.antiAlias ? antialias(x, y) : traceScreenCoords(x, y);
+            yield trace(scene.camera.position, scene.camera.lookAt, x, y);
         }
     }
 }
 
-function prepScene(scene) {
+function prepareScene(scene) {
     for (var shape of scene.shapes) {
         if (shape.type === 'polygon') {
-            // var v0 = shape.vertices[0];
-            // var v1 = shape.vertices[1];
-            // var v2 = shape.vertices[2];
-            // shape.point = v0;
-            // shape.edges = [
-            //     vec.subtract(v1, v0),
-            //     vec.subtract(v2, v1),
-            //     vec.subtract(v0, v2),
-            // ];
             shape.edges = [];
-            for(var i = 0; i < shape.vertices.length; i++) {
+            for (var i = 0; i < shape.vertices.length; i++) {
                 shape.edges.push(vec.subtract(shape.vertices[(i + 1) % shape.vertices.length], shape.vertices[i]));
             }
-
             shape.point = shape.vertices[0];
             shape.normal = vec.normalize(vec.crossProduct(shape.edges[0], shape.edges[1]));
-            // shape.normal = vec.normalize(vec.crossProduct(shape.edges[0], vec.subtract(v2, v0)));
-        }
-
-        if (shape.type === 'mesh') {
-
         }
     }
 }
@@ -296,7 +358,7 @@ function traceRay(scene, ray, depth, excludedShape) {
     if (depth > scene.settings.reflectionDepth)
         return scene.ambient;
 
-    var intersection = intersectShapes(scene, ray, excludedShape);
+    var intersection = intersectAllShapes(scene, ray, excludedShape);
 
     if (!Number.isFinite(intersection.t)) return scene.ambient;
 
@@ -312,11 +374,11 @@ function traceRay(scene, ray, depth, excludedShape) {
     return vec.add(lighting, vec.multiply(intersection.shape.specular, reflection));
 }
 
-function intersectShapes(scene, ray, excludedShape) {
+function intersectAllShapes(scene, ray, excludedShape) {
     var intersection = atInfinity;
     for (var shape of scene.shapes) {
         if (shape === excludedShape) continue;
-        var newIntersection = intersect[shape.type](ray, shape);
+        var newIntersection = intersectFunctions[shape.type](ray, shape);
         if (newIntersection.t > 0 && newIntersection.t < intersection.t)
             intersection = newIntersection;
     }
@@ -343,17 +405,6 @@ function intersectPolygon(ray, shape) {
     for (var i = 0; i < shape.vertices.length; i++) {
         var c0 = vec.subtract(intersection.pointAtTime, shape.vertices[i]);
         if (vec.dotProduct(shape.normal, vec.crossProduct(shape.edges[i], c0)) < 0) return atInfinity;
-    }
-
-    return intersection;
-}
-
-function intersectMesh(ray, shape) {
-    var intersection = atInfinity;
-    for (var i = 0; i < shape.face.length; i++) {
-        var newIntersection = intersectPlane(ray, shape.face[i]);
-        if (newIntersection.t > 0 && newIntersection.t < intersection.t)
-            intersection = newIntersection;
     }
 
     return intersection;
@@ -387,16 +438,16 @@ function colorAtIntersection(scene, intersection, ray) {
     for (var light of scene.lights) {
         var pointToLight = vec.subtract(light.position, intersection.pointAtTime);
 
+        // shadows
         if (scene.settings.shadows) {
             var length = vec.magnitude(pointToLight);
             pointToLight = vec.normalize(pointToLight);
 
-            var lightIntersection = intersectShapes(scene, { point: intersection.pointAtTime, vector: pointToLight }, intersection.shape);
+            var lightIntersection = intersectAllShapes(scene, { point: intersection.pointAtTime, vector: pointToLight }, intersection.shape);
             if (lightIntersection.t < length) continue;
         } else {
             pointToLight = vec.normalize(pointToLight);
         }
-
 
         // diffuse
         var cos = Math.max(0, vec.dotProduct(normal, pointToLight));
@@ -477,10 +528,20 @@ module.exports = {
         reflectionDepth: 3,
         antiAlias: true,
         shadows: true,
+        depthOfField: {
+            enabled: false,
+            radius: .15,
+            samples: 4
+        },
+        stereoscopic: {
+            enabled: false,
+            radius: .5,
+            vr: true
+        },
     },
     camera: {
-        position: [-1, 1.5, 0],
-        lookAt: [0, 0, 2],
+        position: [-0.5, 1.5, 0],
+        lookAt: [1, .5, 3],
         fov: 90,
     },
     shapes: [
@@ -488,10 +549,10 @@ module.exports = {
         {
             type: 'polygon',
             vertices: [
-                [.5, 1, 1],
                 [.5, 1, 2],
-                [1.5, 1, 2],
+                [.5, 1, 1],
                 [1.5, 1, 1],
+                [1.5, 1, 2],
             ],
             // brass
             ambient: [.33, .22, .03],
