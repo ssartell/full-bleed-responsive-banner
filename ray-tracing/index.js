@@ -263,7 +263,7 @@ function* renderScene(scene, width, height) {
             var c4 = f(position, lookAt, x + .75, y + .75);
 
             return vec.scale(vec.add(vec.add(c1, c2), vec.add(c3, c4)), .25);
-        }
+        };
     }
 
     function drunkMode(f, r, samples) {
@@ -275,7 +275,7 @@ function* renderScene(scene, width, height) {
             }
 
             return vec.scale(color, 1 / samples);
-        }
+        };
     }
 
     function depthOfField(f, r, samples) {
@@ -295,7 +295,7 @@ function* renderScene(scene, width, height) {
             }
 
             return vec.scale(color, 1 / samples);
-        }
+        };
     }
 
     function stereoscopic(f, r) {
@@ -304,7 +304,7 @@ function* renderScene(scene, width, height) {
             var vRight = vec.normalize(vec.crossProduct(vec.up, eyeVector));
             var vUp = vec.normalize(vec.crossProduct(eyeVector, vRight));
 
-            var dir = scene.settings.stereoscopic.vr ? -1 : 1;
+            var dir = scene.settings.stereoscopic.vrHeadset ? -1 : 1;
 
             if (x < width / 2) {
                 var leftRight = vec.scale(vRight, r * dir);
@@ -535,8 +535,8 @@ module.exports = {
         },
         stereoscopic: {
             enabled: false,
-            radius: .5,
-            vr: true
+            radius: .2,
+            vrHeadset: true
         },
     },
     camera: {
