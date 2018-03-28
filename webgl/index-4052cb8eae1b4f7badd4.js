@@ -2462,8 +2462,7 @@ var fsSource = __webpack_require__(12);
 var scripts = document.getElementsByTagName('script');
 var lastScript = scripts[scripts.length-1];
 var scriptName = lastScript.src;
-document.getElementById('version').innerText = scriptName;
-
+document.getElementById('version').innerText = scriptName.split('/').pop();
 
 var canvas = document.getElementById('c');
 var width = canvas.clientWidth;
@@ -6739,4 +6738,4 @@ module.exports = "precision mediump float;\r\n\r\nuniform mat4 uViewProjectionIn
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=index-188e7a0cc70e4ec79519.js.map
+//# sourceMappingURL=index-4052cb8eae1b4f7badd4.js.map
