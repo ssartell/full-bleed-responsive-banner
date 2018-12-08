@@ -14912,11 +14912,14 @@ var day06 = __webpack_require__(827);
 
 var input = __webpack_require__(831);
 
-var {coords, buffer, bounds} = day06(input);
+var {coords, buffer, bounds, biggest} = day06(input);
 var boundsWidth = bounds.maxX - bounds.minX + 1;
 var boundsHeight = bounds.maxY - bounds.minY + 1;
 coords = R.addIndex(R.forEach)((x, i) => { x.i = i; return x; }, coords);
 buffer = R.filter(x => x !== null, buffer);
+
+var winner = R.find(x => x.count === biggest, coords);
+//var winnerPoints = R.filter(x => x.coord.count === winner.count, buffer);
 
 var frames = R.pipe(R.groupWith((a, b) => a.dist === b.dist))(buffer);
 
@@ -14943,8 +14946,13 @@ var toColor = function(i) {
         ]
     }    
 }
+R.forEach(x => {
+    x.getColor = loc => toColor(x.i);
+    if (x === winner) {
+        x.getColor = loc => (loc.x + loc.y) % 2 === 0 ? toColor(x.i) : R.map(x => x * .4, toColor(x.i));
+    }
+}, coords);
 
-var visual = document.getElementById('visual');
 var canvas = document.getElementById('c');
 var width = canvas.clientWidth;
 var height = canvas.clientHeight;
@@ -14967,7 +14975,7 @@ var intervalId = setInterval(function () {
 
     for(var loc of frames[i]) {
         var imageData = ctx.createImageData(1, 1);
-        var color = loc.dist === 0 ? [0, 0, 0] : toColor(loc.coord.i);
+        var color = loc.dist === 0 ? [0, 0, 0] : loc.coord.getColor(loc);
         imageData.data[0] = color[0];
         imageData.data[1] = color[1];
         imageData.data[2] = color[2];
@@ -36597,7 +36605,8 @@ var solve = coords => {
         }
     }
 
-    return {coords, buffer, bounds: {minX, maxX, minY, maxY}};
+    var biggest = biggestArea(coords);
+    return {coords, buffer, biggest, bounds: {minX, maxX, minY, maxY}};
 };
 
 var solution = R.pipe(parseInput, solve);
