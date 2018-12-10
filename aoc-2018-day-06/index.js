@@ -15005,6 +15005,11 @@ var resetButton = document.getElementById('reset');
 pauseButton.onclick = function () {
     paused = !paused;
     pauseButton.innerText = paused ? "play" : "pause";
+    if (paused) {
+        stepButton.removeAttribute('disabled');
+    } else {
+        stepButton.setAttribute('disabled', 'disabled');
+    }
 };
 
 stepButton.onclick = function () {
