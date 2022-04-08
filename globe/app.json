@@ -1,0 +1,145 @@
+{
+	"metadata": {
+		"type": "App"
+	},
+	"project": {
+		"shadows": true,
+		"shadowType": 1,
+		"vr": false,
+		"physicallyCorrectLights": false,
+		"toneMapping": 0,
+		"toneMappingExposure": 1
+	},
+	"camera": {
+		"metadata": {
+			"version": 4.5,
+			"type": "Object",
+			"generator": "Object3D.toJSON"
+		},
+		"object": {
+			"uuid": "38786663-51cf-4abd-8fca-c899989dfde8",
+			"type": "PerspectiveCamera",
+			"name": "Camera",
+			"layers": 1,
+			"matrix": [0.5387744057103319,0,-0.842450081459714,0,-0.28031447202536464,0.9430195984277037,-0.1792702812916677,0,0.7944469375135257,0.3327371890565475,0.5080748237160818,0,2.930491689079751,1.117149966962859,2.0993963379546963,1],
+			"fov": 50,
+			"zoom": 1,
+			"near": 0.01,
+			"far": 1000,
+			"focus": 10,
+			"aspect": 1.8409090909090908,
+			"filmGauge": 35,
+			"filmOffset": 0
+		}
+	},
+	"scene": {
+		"metadata": {
+			"version": 4.5,
+			"type": "Object",
+			"generator": "Object3D.toJSON"
+		},
+		"geometries": [
+			{
+				"uuid": "7a733d7c-4493-4ce6-a16c-72eb32a23c14",
+				"type": "SphereGeometry",
+				"radius": 1,
+				"widthSegments": 64,
+				"heightSegments": 32,
+				"phiStart": 0,
+				"phiLength": 6.283185307179586,
+				"thetaStart": 0,
+				"thetaLength": 3.274237676741363
+			}],
+		"materials": [
+			{
+				"uuid": "baadb151-d400-41e4-ae1b-ef425a1a508b",
+				"type": "MeshPhysicalMaterial",
+				"color": 3407959,
+				"roughness": 1,
+				"metalness": 0,
+				"sheen": 0,
+				"sheenColor": 0,
+				"sheenRoughness": 1,
+				"emissive": 0,
+				"specularIntensity": 1,
+				"specularColor": 16777215,
+				"clearcoat": 0,
+				"clearcoatRoughness": 0,
+				"envMapIntensity": 1,
+				"reflectivity": 0.5,
+				"transmission": 0,
+				"thickness": 0,
+				"attenuationDistance": 0,
+				"attenuationColor": 16777215,
+				"depthFunc": 3,
+				"depthTest": true,
+				"depthWrite": true,
+				"colorWrite": true,
+				"stencilWrite": false,
+				"stencilWriteMask": 255,
+				"stencilFunc": 519,
+				"stencilRef": 0,
+				"stencilFuncMask": 255,
+				"stencilFail": 7680,
+				"stencilZFail": 7680,
+				"stencilZPass": 7680
+			}],
+		"object": {
+			"uuid": "14a94afb-98fe-4d5f-8a93-6c017effe5e1",
+			"type": "Scene",
+			"name": "Scene",
+			"layers": 1,
+			"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+			"background": 0,
+			"children": [
+				{
+					"uuid": "ab40d7ad-1f72-425a-bbbf-ea0a1c63c3de",
+					"type": "Mesh",
+					"name": "Sphere",
+					"layers": 1,
+					"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+					"geometry": "7a733d7c-4493-4ce6-a16c-72eb32a23c14",
+					"material": "baadb151-d400-41e4-ae1b-ef425a1a508b"
+				},
+				{
+					"uuid": "ca5b0b31-6340-41dd-9f18-8fbc7ce20c5f",
+					"type": "DirectionalLight",
+					"name": "DirectionalLight",
+					"layers": 1,
+					"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,-1.7319275051353489,4.222722941510117,7.5,1],
+					"color": 11643135,
+					"intensity": 1,
+					"shadow": {
+						"camera": {
+							"uuid": "4f57951b-6cb4-4dce-a4c4-8ae7992eae65",
+							"type": "OrthographicCamera",
+							"layers": 1,
+							"zoom": 1,
+							"left": -5,
+							"right": 5,
+							"top": 5,
+							"bottom": -5,
+							"near": 0.5,
+							"far": 500
+						}
+					}
+				},
+				{
+					"uuid": "4be36e59-ed82-4b3b-be64-da1dbb636ff8",
+					"type": "AmbientLight",
+					"name": "AmbientLight",
+					"layers": 1,
+					"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,-1.7404953017368199,1],
+					"color": 10879231,
+					"intensity": 0.14
+				}]
+		}
+	},
+	"scripts": {
+		"14a94afb-98fe-4d5f-8a93-6c017effe5e1": [
+			{
+				"name": "paths",
+				"source": "let totalSteps = 100;\nlet totalLines = 10;\nconst material = new THREE.LineBasicMaterial( { color: 0xff00ff } );\nlet lines = [];\n\nfor(let i = 0; i < totalLines; i++) {\n\tlet theta1 = THREE.MathUtils.randFloat(0, 2 * Math.PI);\n\tlet phi1 = THREE.MathUtils.randFloat(-Math.PI, Math.PI);\n\tlet theta2 = THREE.MathUtils.randFloat(0, 2 * Math.PI);\n\tlet phi2 = THREE.MathUtils.randFloat(-Math.PI, Math.PI);\n\n\tconst points = [];\n\tfor(let j = 0; j < totalSteps; j++) {\n\t\tlet t = j / totalSteps;\n\t\tlet point = getPoint(\n\t\t\t1 + .5 * Math.sin(Math.PI * t),\n\t\t\tTHREE.MathUtils.lerp(theta1, theta2, t),\n\t\t\tTHREE.MathUtils.lerp(phi1, phi2, t));\n\t\tpoints.push(point);\n\t}\n\tconst geometry = new THREE.BufferGeometry().setFromPoints( points );\n\tgeometry.setDrawRange( 0, 1 );\n\tconst line = new THREE.Line( geometry, material );\n\tlines.push(line);\n\tscene.add( line );\n}\n\nlet totalTime = 5000;\n\nfunction update( event ) {\n\tconst t = event.time / totalTime;\n\tconst step = Math.floor(totalSteps * t) % totalSteps;\n\t\n\tfor(let line of lines) {\n\t\tline.geometry.setDrawRange( 0, Math.min(totalSteps, step));\n\t\tline.geometry.attributes.position.needsUpdate = true;\n\t\tline.geometry.computeBoundingBox();\n\t\tline.geometry.computeBoundingSphere();\n\t}\n}\n\nfunction getPoint(rad, theta, phi) {\n\t\n\treturn new THREE.Vector3( rad * Math.cos(theta) * Math.sin(phi), rad * Math.sin(theta) * Math.sin(phi), rad * Math.cos(theta) );\n}"
+			}]
+	}
+}
