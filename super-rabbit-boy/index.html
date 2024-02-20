@@ -9,53 +9,104 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
   <style>
+    @font-face {
+      font-family: 'pixel';
+        src: url("Pixeled.ttf");
+        font-weight: 400;
+        font-style: normal;
+    }
     body {
-      font-family: "Pixelify Sans", sans-serif;
+      margin: 0;
+      font-family: "pixel", "Pixelify Sans", sans-serif;
       font-optical-sizing: auto;
       font-style: normal;
-      font-size: 2em;
+    }
+    header {
+      background: #e81c8f;
     }
     h1 {
-      line-height: .8em;
+      line-height: 1.5em;
+      margin: 0;
+      padding: 20px;
     }
     h1 .title {
-      color: #00b2ff;
-      text-shadow: 5px 5px 0 #003952;
+      color: #1fc3f4;
+      text-shadow: 5px 5px 0 #002535;
     }
     h1 .sub-title {
-      font-size: .75em;
+      font-size: .72em;
       color: white;
       text-shadow: -5px 0 black, 0 5px black, 5px 0 black, 0 -5px black;
     }
     h2 {
-      font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin-bottom: 0px;
+      font-family: "pixel", "Pixelify Sans", sans-serif;
+      margin: 0px;
       font-size: 1em;
+    }
+    form {
+      margin: 20px;
+      padding: 20px;
+      background-color: #e8e8e8;
+      border-radius: 20px;
+      box-shadow: 0 2px 1px 2px #ccc;
     }
     input {
       padding: 10px;
     }
     button {
-      padding: 10px;
+      padding: 4px 10px;
+      background-color: #a11665;
+      border: none;
+      color: #fff;
+      font-family: "pixel", "Pixelify Sans", sans-serif;
+      font-size: 10px;
+      line-height: 30px;
+    }
+    pre {
+      font-size: 14px;
+      white-space: pre-wrap;
     }
   </style>
 <script defer src="main.js"></script></head>
 
 <body>
-  <h1><span class="title">Press Start</span><br/><span class="sub-title">Super Game Book!</span></h1>
-  
+  <header>
+    <h1>
+      <span class="title">PRESS START</span><br/>
+      <span class="sub-title">SUPER GAME BOOK!</span>
+    </h1>
+  </header>
+
   <form id="shortest-path">
     <h2>Shortest Path</h2>
     <input id="pageNum" placeholder="page number" />
-    <button type="submit">Find Path</button>
+    <button type="submit">START</button>
     <pre id="path-output"></pre>
   </form>
 
   <form id="prev-pages">
     <h2>Previous Pages</h2>
     <input id="prev-pageNum" placeholder="page number" />
-    <button type="submit">Find Previous</button>
+    <button type="submit">START</button>
     <pre id="prev-output"></pre>
+  </form>
+
+  <form id="vis">
+    <h2>Visualize Pages!</h2>
+    <input id="vis-pageNum" placeholder="page number" />
+    <button type="submit">START</button>
+  </form>
+
+  <div id="cy" style="width: 100%; height: 100vh;"></div>
+
+  <form id="you-wins">
+    <h2>All You Wins!</h2>
+    <pre id="you-wins-output"></pre>
+  </form>
+
+  <form id="game-overs">
+    <h2>All Game Overs!</h2>
+    <pre id="game-overs-output"></pre>
   </form>
 </body>
 
