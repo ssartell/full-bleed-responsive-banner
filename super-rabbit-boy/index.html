@@ -23,6 +23,8 @@
     }
     header {
       background: #e81c8f;
+      background-image: repeating-conic-gradient(from 0deg at 200px center, #e81c8f 0 6deg, #cf1a81 6deg 12deg);
+      border-bottom: 4px solid black;
     }
     h1 {
       line-height: 1.5em;
@@ -31,7 +33,10 @@
     }
     h1 .title {
       color: #1fc3f4;
-      text-shadow: 5px 5px 0 #002535;
+      text-shadow: 4px 6px 0 #002535;
+      -webkit-background-clip: text;
+      -moz-background-clip: text;
+      background-clip: text;
     }
     h1 .sub-title {
       font-size: .72em;
@@ -45,10 +50,11 @@
     }
     form {
       margin: 20px;
-      padding: 20px;
+      padding: 15px;
       background-color: #e8e8e8;
-      border-radius: 20px;
-      box-shadow: 0 2px 1px 2px #ccc;
+      border-radius: 15px;
+      /* box-shadow: 0 2px 1px 2px #ccc; */
+      box-shadow: 0 0px 0px 4px #000;
     }
     input {
       padding: 10px;
@@ -83,33 +89,36 @@
       <span class="sub-title">SUPER GAME BOOK!</span>
     </h1>
   </header>
+  <section style="background-color: #f3c134; overflow: hidden;">
+    <form id="form">
+      <h2>Find Page Path!</h2>
+      <div class="entry">
+        <input id="pageNum" placeholder="page number" />
+        <button type="submit">START</button>
+      </div>    
+    </form>
+  
+    <div id="cy" style="width: 100%; height: 60vh;"></div>
+  
+    <form id="path-details" class="hide">
+      <h2>Previous Pages</h2>
+      <pre id="prev-output"></pre>
+      <h2>Shortest Path</h2>
+      <pre id="path-output"></pre>
+    </form>
+  </section>
+  
+  <section style="background-color: #97c132; overflow: hidden;">
+    <form id="you-wins">
+      <h2>All You Wins!</h2>
+      <pre id="you-wins-output"></pre>
+    </form>
 
-  <form id="form">
-    <h2>Find Page Path!</h2>
-    <div class="entry">
-      <input id="pageNum" placeholder="page number" />
-      <button type="submit">START</button>
-    </div>    
-  </form>
-
-  <div id="cy" style="width: 100%; height: 75vh;"></div>
-
-  <form id="path-details" class="hide">
-    <h2>Previous Pages</h2>
-    <pre id="prev-output"></pre>
-    <h2>Shortest Path</h2>
-    <pre id="path-output"></pre>
-  </form>
-
-  <form id="you-wins">
-    <h2>All You Wins!</h2>
-    <pre id="you-wins-output"></pre>
-  </form>
-
-  <form id="game-overs">
-    <h2>All Game Overs!</h2>
-    <pre id="game-overs-output"></pre>
-  </form>
+    <form id="game-overs">
+      <h2>All Game Overs!</h2>
+      <pre id="game-overs-output"></pre>
+    </form>
+  </section>
 </body>
 
 </html>
